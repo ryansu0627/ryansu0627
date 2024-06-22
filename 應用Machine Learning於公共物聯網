@@ -1,0 +1,46 @@
+# 導入必要的庫
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# 加載數據
+url = 'https://raw.githubusercontent.com/yourusername/yourrepository/main/air_quality_data.csv'
+data = pd.read_csv(url)
+
+# 數據清理
+data.dropna(inplace=True)
+data['date'] = pd.to_datetime(data['date'])
+
+# 選擇特徵並標準化
+features = data[['PM2.5', 'PM10', 'NO2', 'O3']]
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(features)
+
+# K-means聚類分析
+k = 3
+kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans.fit(features_scaled)
+data['Cluster'] = kmeans.labels_
+
+# 結果可視化
+plt.figure(figsize=(10, 8))
+plt.scatter(data['PM2.5'], data['PM10'], c=data['Cluster'], cmap='viridis')
+plt.xlabel('PM2.5')
+plt.ylabel('PM10')
+plt.title('K-means Clustering of Air Quality Data')
+plt.colorbar(label='Cluster')
+plt.show()
+
+# 顯示每個聚類的中心
+centers = scaler.inverse_transform(kmeans.cluster_centers_)
+plt.figure(figsize=(10, 8))
+plt.scatter(data['PM2.5'], data['PM10'], c=data['Cluster'], cmap='viridis', label='Data Points')
+plt.scatter(centers[:, 0], centers[:, 1], c='red', s=300, alpha=0.6, label='Centers')
+plt.xlabel('PM2.5')
+plt.ylabel('PM10')
+plt.title('K-means Clustering of Air Quality Data with Centers')
+plt.colorbar(label='Cluster')
+plt.legend()
+plt.show()
